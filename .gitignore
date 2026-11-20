@@ -1,0 +1,30 @@
+# 依赖与构建产物
+node_modules/
+worker/.dev.vars
+worker/.wrangler/
+worker/dist/
+
+# 密钥（绝不能提交）
+.env
+.env.local
+*.key
+secrets*
+
+# 打包产物
+yousum-extension-test.zip
+*.crx
+*.pem
+
+# 系统与编辑器
+.DS_Store
+Thumbs.db
+.idea/
+.vscode/
+*.swp
+
+# 日志
+*.log
+npm-debug.log*
+
+# Playwright 截图产物
+screenshots/

@@ -1,0 +1,15 @@
+{
+  "name": "yousum-proxy",
+  "version": "0.1.0",
+  "private": true,
+  "type": "module",
+  "description": "YouSum Chrome 扩展的 Cloudflare Worker AI 代理层",
+  "scripts": {
+    "dev": "wrangler dev",
+    "deploy": "wrangler deploy",
+    "tail": "wrangler tail"
+  },
+  "devDependencies": {
+    "wrangler": "^3.90.0"
+  }
+}

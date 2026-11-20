@@ -1,0 +1,19 @@
+{
+  "name": "yousum",
+  "version": "0.1.0",
+  "private": true,
+  "type": "module",
+  "description": "YouSum - AI YouTube 视频摘要 Chrome 扩展",
+  "license": "MIT",
+  "scripts": {
+    "test": "node tests/worker.test.mjs && node tests/content.test.mjs",
+    "test:worker": "node tests/worker.test.mjs",
+    "test:content": "node tests/content.test.mjs",
+    "test:e2e": "node tests/e2e.test.mjs",
+    "build": "python tools/build.py",
+    "icons": "python tools/make_icons.py"
+  },
+  "devDependencies": {
+    "playwright": "^1.65.1"
+  }
+}

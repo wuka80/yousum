@@ -1,0 +1,15 @@
+name = "yousum-proxy"
+main = "src/index.js"
+compatibility_date = "2025-01-01"
+
+# 可选：绑定 KV 后速率计数持久化（不绑定则使用 Worker 内存计数）
+# 创建 KV 空间：wrangler kv namespace create RATE_LIMITER
+# 然后把返回的 id 填到下面
+# [[kv_namespaces]]
+# binding = "RATE_LIMITER"
+# id = "your-kv-namespace-id"
+
+[vars]
+# 生产环境务必把 DEPLOY.md 里提到的 ALLOWED_ORIGINS 改成扩展 ID
+# 这里通过代码里的常量控制，vars 仅用于留档
+ENVIRONMENT = "production"
