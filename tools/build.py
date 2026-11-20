@@ -2,7 +2,10 @@
 YouSum 打包脚本
 
 生成 yousum-extension-test.zip（纯扩展文件，可直接加载测试）。
-只包含 manifest.json / background / content / icons，不含 Worker、测试和文档。
+只包含 manifest.json / background / content / popup / web / icons，
+不含 Worker、测试和文档。
+
+注意：web/caption-bridge.js 必须打包 —— 它是字幕提取的桥接脚本。
 
 用法：
     python tools/build.py
@@ -16,7 +19,7 @@ ROOT = os.path.dirname(HERE)
 OUT = os.path.join(os.path.dirname(ROOT), "yousum-extension-test.zip")
 
 # 只打包这些运行时文件
-INCLUDE = ["manifest.json", "background", "content", "icons"]
+INCLUDE = ["manifest.json", "background", "content", "popup", "web", "icons"]
 
 # 这些目录/文件即使在 INCLUDE 路径下也要排除
 EXCLUDE_NAMES = {"test", "tests", "__pycache__", ".DS_Store", "node_modules"}

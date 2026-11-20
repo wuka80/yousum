@@ -60,11 +60,13 @@ YouSum 是一款开源的 Chrome 扩展，用于在 YouTube 观看页生成 AI �
 | 权限 | 为什么需要 |
 |------|-----------|
 | `storage` | 本地记录每日使用次数 |
-| `activeTab` | 点击扩展图标时与当前标签页通信 |
-| `scripting` | 在 YouTube 观看页注入摘要面板 |
-| `https://*.youtube.com/*` | 读取字幕轨、注入面板 |
+| `alarms` | 每日 0 点重置免费额度（MV3 后台任务必须用 alarms） |
+| `https://*.youtube.com/*` | 读取字幕轨、显示弹窗 |
+| `https://*.workers.dev/*` | 与开发者自建的 AI 代理服务通信 |
 
 扩展**只在 YouTube 观看页**运行，不在其他任何网站激活。
+扩展**不申请** `tabs`、`history`、`bookmarks`、`webRequest` 等可读取浏览数据的权限，
+也不含任何第三方分析、广告或追踪 SDK。
 
 ---
 

@@ -25,10 +25,15 @@
 yousum/
 ├── manifest.json              # Manifest V3 清单
 ├── background/
-│   └── service-worker.js      # 后台服务：每日额度管理、图标点击
+│   └── service-worker.js      # 后台服务：每日额度 + chrome.alarms 重置
 ├── content/
-│   ├── content.js             # 内容脚本：字幕提取 + 面板 UI + 请求 Worker
-│   └── content.css            # 浮层面板样式
+│   └── content.js             # 内容脚本：请求 Worker + 消息处理
+├── popup/                     # 扩展弹窗（主 UI）
+│   ├── popup.html
+│   ├── popup.js
+│   └── popup.css
+├── web/
+│   └── caption-bridge.js      # MAIN world 桥接脚本：提取字幕轨
 ├── icons/
 │   ├── icon16.png
 │   ├── icon48.png
@@ -37,8 +42,10 @@ yousum/
 │   ├── src/index.js
 │   ├── wrangler.toml
 │   └── package.json
+├── tests/                     # 自动化测试（217 项）
 ├── tools/
-│   └── make_icons.py          # 图标生成脚本
+│   ├── make_icons.py          # 图标生成脚本
+│   └── build.py               # 打包脚本
 ├── README.md
 ├── DEPLOY.md                  # 部署指南
 ├── STORE_LISTING.md           # Chrome Web Store 上架文案
@@ -86,9 +93,10 @@ yousum/
 ## 本地加载测试
 
 1. 按 [DEPLOY.md](DEPLOY.md) 部署 Worker，拿到 Worker 地址。
-2. 把地址填入 `background/service-worker.js` 顶部的 `API_URL`（**只有这一处**）。
-3. 打开 `chrome://extensions/` → 开启「开发者模式」→「加载已解压的扩展程序」→ 选择本目录。
-4. 打开任意 YouTube 视频页，右上角会出现红色 YouSum 按钮，点击展开面板。
+2. 把地址填入 `content/content.js` 的 `API_URL`（约 340 行，**只有这一处**）。
+3. 确认 `manifest.json` 的 `host_permissions` 含你的 Worker 域名（默认已含 `https://*.workers.dev/*`）。
+4. 打开 `chrome://extensions/` → 开启「开发者模式」→「加载已解压的扩展程序」→ 选择本目录。
+5. 打开任意 YouTube 视频页，点击工具栏的 YouSum 图标，弹窗即出现。
 
 > 也可以直接加载 `yousum-extension-test.zip`（纯扩展文件，无需解压）。
 
@@ -98,9 +106,10 @@ yousum/
 
 | 位置 | 常量 | 默认值 | 说明 |
 |------|------|--------|------|
-| `background/service-worker.js` | `API_URL` | 占位符 | **必须改**：Worker 地址 |
+| `content/content.js` | `API_URL` | 占位符 | **必须改**：Worker 地址（约 340 行） |
 | `background/service-worker.js` | `FREE_QUOTA_PER_DAY` | `10` | 每日免费次数 |
 | `content/content.js` | `MAX_TRANSCRIPT_CHARS` | `12000` | 送入模型的字幕最大字符数 |
+| `manifest.json` | `host_permissions` | YouTube + workers.dev | **必须改**：换成你的 Worker 域名 |
 | `worker/src/index.js` | `ALLOWED_ORIGINS` | YouTube 域名 | 静态来源白名单 |
 | `worker/src/index.js` | `ALLOWED_EXTENSION_ID` | 未设置 | **建议设置**：锁定扩展 ID |
 | `worker/src/index.js` | `REQUESTS_PER_MINUTE` | `12` | 单 IP 每分钟上限 |
@@ -114,10 +123,13 @@ yousum/
 ```bash
 npm install               # 安装 playwright（仅 e2e 需要）
 
-node tests/worker.test.mjs    # 44 项：参数校验、速率限制、Origin 白名单、prompt 构造、错误处理
-node tests/content.test.mjs   # 22 项：字幕解析、时间戳格式化、边界情况
-node tests/e2e.test.mjs       # 23 项：真实 Chromium 加载扩展，验证注入/UI/模式切换/额度
+node tests/worker.test.mjs    # 46 项：参数校验、速率限制、Origin 白名单、prompt 构造、错误处理
+node tests/content.test.mjs   # 54 项：字幕解析、时间戳格式化、XSS 净化、URL 注入防护
+node tests/security.test.mjs  # 83 项：逐项对照安全修复清单的静态审计
+node tests/e2e.test.mjs       # 34 项：真实 Chromium 加载扩展，含完整链路与 XSS 载荷
 ```
+
+共 217 项，全部通过。
 
 E2E 需要完整 Chromium（headless shell 不支持加载扩展）：
 

@@ -59,26 +59,32 @@ curl https://yousum-proxy.YOUR-SUBDOMAIN.workers.dev/health
 
 ## 第 3 步：把 Worker 地址填进扩展
 
-**只需改一处**（网络请求统一由 background service worker 发出）：
+**只需改一处**（网络请求由 content script 发出，API_URL 约在 340 行处）：
 
 | 文件 | 位置 |
 |------|------|
-| `background/service-worker.js` | 顶部 `const API_URL = ...` |
+| `content/content.js` | `const API_URL = ...`（约 340 行） |
 
 ```js
 const API_URL = 'https://yousum-proxy.YOUR-SUBDOMAIN.workers.dev';
 ```
 
-> 为什么只有一处？内容脚本里的 `fetch()` 受页面 CORS 约束，容易在真实环境里被拦。
-> 把请求放到 background service worker 里，以扩展身份发出，由 `host_permissions` 授权，
-> 不受页面 CORS 干扰。
+> **重要**：还要确认 `manifest.json` 的 `host_permissions` 里包含你的 Worker 域名。
+> content script 的 `fetch()` 以**页面来源**（`https://www.youtube.com`）发起，
+> Chrome 会用扩展的 host_permissions 判断是否放行 —— 没有对应域名会被直接拦截，
+> 表现为 `Failed to fetch`。
+>
+> 默认已包含 `https://*.workers.dev/*`。如果你用自己的域名，需要手动加一条。
 
 ---
 
-## 第 4 步：锁定扩展 ID（重要）
+## 第 4 步：锁定扩展 ID（可选）
 
 Worker 默认放行任意 `chrome-extension://` 来源。这不是真正的安全边界（Origin 头可被伪造），
 但锁定后能挡住其他扩展的误用。
+
+> 注意：主流程请求由 content script 发出，Origin 是 YouTube 页面来源；
+> 这个开关主要防的是「其他扩展直接调用你的 Worker 刷额度」。
 
 **上架拿到正式扩展 ID 后**，执行：
 
@@ -136,19 +142,15 @@ git push -u origin main
 
 ### 7.1 打包
 
-```bash
-cd ..
-zip -r yousum-extension-test.zip yousum/ \
-  -x "yousum/worker/*" "yousum/tools/*" "yousum/.git/*" "yousum/.gitignore" \
-  -x "yousum/*.md"
-```
-
-或者用脚本：
+用打包脚本（推荐，会自动排除测试与文档并校验 manifest）：
 
 ```bash
 cd yousum
-zip -r ../yousum-extension-test.zip manifest.json background content icons
+python tools/build.py
 ```
+
+打包内容：`manifest.json` / `background/` / `content/` / `popup/` / `web/` / `icons/`。
+`web/caption-bridge.js` **必须包含在内** —— 它是字幕提取的桥接脚本，缺了扩展就抓不到字幕。
 
 打包后**必须验证**：`chrome://extensions/` → 加载已解压 → 但这次选 zip 解压后的目录，确认功能一致。
 

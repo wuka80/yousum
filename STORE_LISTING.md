@@ -9,13 +9,13 @@
 **扩展名称**（30 字符内）
 
 ```
-YouSum - AI 视频摘要
+YouSum - AI YouTube Video Summary
 ```
 
 **简短说明**（132 字符内）
 
 ```
-一键生成 YouTube 视频摘要：100字速览 / 完整要点 / 时间戳大纲，免费无需登录。
+Summarize any YouTube video: 100-word brief, key points, or timestamped outline. Free, no sign-up.
 ```
 
 **类别**
@@ -133,17 +133,17 @@ Web page content: 仅在用户主动点击"生成摘要"时，读取当前 YouTu
 | 权限 | 用途 |
 |------|------|
 | `storage` | 本地保存每日使用次数（不离开设备） |
-| `activeTab` | 点击扩展图标时与当前页面通信 |
-| `scripting` | 在 YouTube 观看页注入摘要面板 |
-| `https://*.youtube.com/*` | 读取视频字幕轨，注入摘要面板 |
-| `https://*.workers.dev/*` | 与开发者自建的 AI 代理服务通信（用于转发摘要请求） |
+| `alarms` | 每日 0 点重置免费额度（MV3 service worker 必须用 alarms，不能用 setInterval） |
+| `https://*.youtube.com/*` | 在观看页读取视频字幕轨、显示弹窗 |
+| `https://*.workers.dev/*` | 与开发者自建的 AI 代理服务通信（转发摘要请求） |
 
-> **重要**：`workers.dev` 是必需的——扩展把字幕发到开发者自己部署的 Cloudflare Worker 处理，
-> API Key 只存在服务端，扩展包内不含任何密钥。审核时如被问到，这是防止密钥泄露的必要设计，
-> 属于「用户主动触发的单一服务通信」，不构成广泛追踪。
+> **关于 `workers.dev`**：扩展把字幕发到开发者自己部署的 Cloudflare Worker 处理，
+> DeepSeek API Key 只存在服务端，扩展包内不含任何密钥。审核时如被问到，
+> 这是防止密钥泄露的必要设计，属于「用户主动触发的单一服务通信」，不构成广泛追踪。
 >
-> 其余权限保持最小化：`host_permissions` 只有 YouTube 域名 + 自建 Worker 域名，
-> 不包含任何第三方分析、广告或追踪服务。
+> **权限最小化**：没有 `tabs`、`history`、`bookmarks`、`webRequest`，
+> 没有 `activeTab` / `scripting`，也没有任何第三方分析、广告或追踪服务。
+> 扩展只在 `youtube.com/watch*` 页面运行，且只在用户主动点击时采集数据。
 
 ---
 
@@ -157,11 +157,13 @@ Web page content: 仅在用户主动点击"生成摘要"时，读取当前 YouTu
 | 小截图 1280×800 | 自行截图 | 必需，至少 1 张 |
 | 大截图 1280×800 | 自行截图 | 建议 3 张 |
 
-**截图建议**（用真实界面截，注意打码）：
+**截图建议**（仓库 `screenshots/` 已生成 5 张，可直接用）：
 
-1. 面板展开 + Brief 模式输出
-2. Detailed 模式的要点列表
-3. Timeline 模式的时间轴大纲
+1. `01-youtube-page.png` — YouTube 观看页场景
+2. `02-popup-brief.png` — Brief 模式（约 100 词速览）
+3. `03-popup-detailed.png` — Detailed 模式（要点列表）
+4. `04-popup-timeline.png` — Timeline 模式（时间戳大纲）
+5. `05-popup-dark.png` — 深色模式
 
 ---
 
