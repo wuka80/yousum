@@ -133,10 +133,12 @@ section('正常请求与 prompt 构造');
 
   const payload = JSON.parse(calls[0].init.body);
   check('model 为 deepseek-chat', payload.model === 'deepseek-chat');
-  check('system prompt 含 brief 指令', /100 字/.test(payload.messages[0].content));
+  check('system prompt 含 brief 指令', /100 words/.test(payload.messages[0].content));
   check('user prompt 含字幕', payload.messages[1].content.includes('hello world'));
   check('user prompt 含标题', payload.messages[1].content.includes('Test Video'));
-  check('brief 模式 max_tokens 较小', payload.max_tokens === 300);
+  check('brief 模式 max_tokens 较小', payload.max_tokens === 400);
+  check('system prompt 要求英文输出', /Write the summary in English/i.test(payload.messages[0].content));
+  check('system prompt 禁止外部知识', /ONLY information that appears in the captions/i.test(payload.messages[0].content));
   check('非流式', payload.stream === false);
 }
 
@@ -145,9 +147,9 @@ section('三种模式的 prompt 差异');
 // ---------------------------------------------------------------------------
 {
   for (const [mode, expectToken, expectPattern] of [
-    ['brief', 300, /100 字/],
-    ['detailed', 1000, /要点列表/],
-    ['timeline', 1200, /时间戳/],
+    ['brief', 400, /100 words/],
+    ['detailed', 1200, /bulleted list/],
+    ['timeline', 1600, /timestamped outline/],
   ]) {
     calls.length = 0;
     mockBehavior = { status: 200, body: { choices: [{ message: { content: 'ok' } }] } };
